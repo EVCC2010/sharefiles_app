@@ -1,0 +1,44 @@
+/* Dashboard.module.css */
+
+.gridContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.gridItem {
+    width: calc(50% - 10px);
+    /* Adjust as needed for different screen sizes */
+}
+
+.card {
+    padding: 20px;
+    border: 1px solid #ccc;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cardHeader {
+    font-weight: bold;
+    color: #000;
+}
+
+.cardMiddle {
+    background-color: #426b1f;
+    color: #fff;
+    padding: 10px 0;
+}
+
+.cardBottom {
+    text-transform: capitalize;
+    font-size: 14px;
+    color: #888;
+}
+
+.cardOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

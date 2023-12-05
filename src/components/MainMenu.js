@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Navbar,
   NavbarBrand,
@@ -10,6 +10,19 @@ import {
 import { AcmeLogo } from './AcmeLogo.jsx'
 
 const MainMenu = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    setIsLoggedIn(!!token) // Set login status based on the token existence
+  }, []) // Empty dependency array to run this effect only once on mount
+
+  const handleLogout = () => {
+    localStorage.removeItem('token') // Remove the token from localStorage
+    setIsLoggedIn(false)
+    window.location.href = '/'
+  }
+
   return (
     <Navbar>
       <NavbarBrand>
@@ -18,25 +31,31 @@ const MainMenu = () => {
       </NavbarBrand>
       <NavbarContent className="sm:flex gap-4" justify="center">
         <NavbarItem>
-          <Link color="foreground" href="./index.js">
+          <Link color="foreground" href="/">
             Home
           </Link>
         </NavbarItem>
-        <NavbarItem>
-          <Link color="foreground" href="#">
-            Files
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="foreground" href="#">
-            Dashboard
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="foreground" href="#">
-            Account
-          </Link>
-        </NavbarItem>
+        {isLoggedIn && (
+          <NavbarItem>
+            <Link color="foreground" href="#">
+              Files
+            </Link>
+          </NavbarItem>
+        )}
+        {isLoggedIn && (
+          <NavbarItem>
+            <Link color="foreground" href="/dashboard">
+              Dashboard
+            </Link>
+          </NavbarItem>
+        )}
+        {isLoggedIn && (
+          <NavbarItem>
+            <Link color="foreground" href="#">
+              Account
+            </Link>
+          </NavbarItem>
+        )}
         <NavbarItem>
           <Link color="foreground" href="#">
             Help & Support
@@ -44,16 +63,22 @@ const MainMenu = () => {
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Link href="#">Login</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Button as={Link} color="primary" href="#" variant="flat">
-            Login
-          </Button>
-        </NavbarItem>
+        {isLoggedIn ? (
+          <NavbarItem>
+            <Button color="primary" variant="flat" onClick={handleLogout}>
+              Logout
+            </Button>
+          </NavbarItem>
+        ) : (
+          <NavbarItem>
+            <Button as={Link} color="primary" href="/login" variant="flat">
+              Login
+            </Button>
+          </NavbarItem>
+        )}
       </NavbarContent>
     </Navbar>
   )
 }
+
 export default MainMenu

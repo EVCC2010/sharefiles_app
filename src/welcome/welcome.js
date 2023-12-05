@@ -36,7 +36,7 @@ const Welcome = () => {
       </CardBody>
       <Divider />
       <CardFooter>
-        <Link showAnchorIcon href="/login">
+        <Link showAnchorIcon href="/signup">
           New user? Sign up here to begin sharing securely.
         </Link>
       </CardFooter>

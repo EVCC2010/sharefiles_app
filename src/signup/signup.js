@@ -3,6 +3,9 @@ import { Input, Button } from '@nextui-org/react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import axios from 'axios'
+import { toast } from 'react-toastify'
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
 
 const Signup = () => {
   const [signupSuccess, setSignupSuccess] = useState(false)
@@ -10,18 +13,20 @@ const Signup = () => {
 
   const handleSignup = async (values, { setSubmitting, resetForm }) => {
     try {
-      const response = await axios.post('http://localhost:4000/signup', values)
+      const response = await axios.post(`${API_BASE_URL}/signup`, values)
       console.log('Signup successful:', response.data)
       setSignupSuccess(true)
       resetForm()
-      // Handle success or navigate to a different page after successful signup
-      alert(
-        "Your account has been succesfully requested, you'll receive a confirmation email once your account is ready to use."
+      toast.success(
+        "Your account has been succesfully created, you'll receive a confirmation email once your account is ready to use."
       )
-      window.location.href = '/'
+      setTimeout(() => {
+        window.location.href = '/'
+      }, 3000)
     } catch (error) {
       console.error('Error:', error.message)
       setSignupError('Signup failed. Please try again.')
+      toast.error('Signup failed, please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -34,9 +39,10 @@ const Signup = () => {
     date_of_birth: Yup.date().required('Date of Birth is required'),
     password: Yup.string()
       .required('Password is required')
+      .min(8, 'Password must be at least 8 characters')
       .matches(
-        /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/,
-        'Password must contain at least one uppercase letter, one special character, and be at least 8 characters long'
+        /^(?=.*[A-Z])(?=.*[!@#$%^&*])/,
+        'Password must contain at least one uppercase letter and one special character'
       ),
     retype_password: Yup.string()
       .required('Retype Password is required')

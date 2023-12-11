@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Card, Button } from '@nextui-org/react'
-import styles from '../css/dashboard.module.css' // Import CSS file for styling
+import styles from '../css/dashboard.module.css'
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
 
 const Dashboard = () => {
   const [summaryData, setSummaryData] = useState({
@@ -10,18 +12,22 @@ const Dashboard = () => {
     sharedFiles: 0,
   })
 
+  const [error, setError] = useState('')
   useEffect(() => {
     const fetchSummaryData = async () => {
       try {
-        const response = await axios.get(
-          'http://localhost:4000/dashboard/summary'
-        )
+        const token = localStorage.getItem('token')
+        const response = await axios.get(`${API_BASE_URL}/dashboard/summary`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         setSummaryData(response.data)
       } catch (error) {
         console.error('Error fetching summary data:', error.message)
+        setError('Failed to fetch summary data')
       }
     }
-
     fetchSummaryData()
   }, [])
 
@@ -37,7 +43,7 @@ const Dashboard = () => {
         const token = localStorage.getItem('token')
 
         try {
-          await axios.post('http://localhost:4000/upload', formData, {
+          await axios.post(`${API_BASE_URL}/upload`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
               Authorization: `Bearer ${token}`,
@@ -62,7 +68,7 @@ const Dashboard = () => {
   }
 
   const redirectToManageFiles = () => {
-    // Logic to redirect to manage uploaded files page
+    window.location.href = '/manageFiles'
   }
 
   return (
@@ -107,6 +113,7 @@ const Dashboard = () => {
             <p>Number of files shared with others</p>
           </div>
         </Card>
+        {error && <p>Error: {error}</p>}
       </div>
 
       <div className={styles.gridItem}>

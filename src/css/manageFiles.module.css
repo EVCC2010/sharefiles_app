@@ -1,0 +1,50 @@
+/* manageFiles.module.css */
+
+.gridContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.gridItem {
+    margin-bottom: 20px;
+}
+
+.cardHeader {
+    padding: 10px;
+    background-color: #f0f0f0;
+    text-align: center;
+}
+
+.cardMiddle {
+    padding: 10px;
+}
+
+.cardBottom {
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+/* Styling for buttons */
+.button {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #ddd;
+}
+
+.button[disabled] {
+    opacity: 0.6;
+    /* Reduce opacity to visually gray out */
+    cursor: not-allowed;
+    /* Change cursor to not-allowed */
+    pointer-events: none;
+    /* Disable pointer events */
+}

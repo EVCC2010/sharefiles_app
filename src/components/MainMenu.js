@@ -15,12 +15,16 @@ const MainMenu = () => {
   useEffect(() => {
     const token = localStorage.getItem('token')
     setIsLoggedIn(!!token) // Set login status based on the token existence
-  }, []) // Empty dependency array to run this effect only once on mount
+  }, [])
 
   const handleLogout = () => {
-    localStorage.removeItem('token') // Remove the token from localStorage
-    setIsLoggedIn(false)
-    window.location.href = '/'
+    try {
+      localStorage.removeItem('token') // Remove the token from localStorage
+      setIsLoggedIn(false)
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
   }
 
   return (
@@ -37,7 +41,7 @@ const MainMenu = () => {
         </NavbarItem>
         {isLoggedIn && (
           <NavbarItem>
-            <Link color="foreground" href="#">
+            <Link color="foreground" href="/manageFiles">
               Files
             </Link>
           </NavbarItem>
@@ -51,13 +55,13 @@ const MainMenu = () => {
         )}
         {isLoggedIn && (
           <NavbarItem>
-            <Link color="foreground" href="#">
+            <Link color="foreground" href="/account">
               Account
             </Link>
           </NavbarItem>
         )}
         <NavbarItem>
-          <Link color="foreground" href="#">
+          <Link color="foreground" href="/help">
             Help & Support
           </Link>
         </NavbarItem>

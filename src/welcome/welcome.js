@@ -9,9 +9,14 @@ import {
   Image,
 } from '@nextui-org/react'
 
+const deleteToken = () => {
+  localStorage.removeItem('token')
+}
+
 const Welcome = () => {
+  deleteToken()
   return (
-    <Card className="max-w-[400px]">
+    <Card className="max-w-[450px]">
       <CardHeader className="flex gap-3">
         <Image
           alt="nextui logo"
@@ -19,6 +24,9 @@ const Welcome = () => {
           radius="sm"
           src="https://banner2.cleanpng.com/20180320/hbq/kisspng-blue-square-triangle-dropbox-5ab0b8fb2cb514.5630102115215311311831.jpg"
           width={40}
+          onError={(e) => {
+            e.target.src = '/fallback-image.jpg' // Provide a fallback image
+          }}
         />
         <div className="flex flex-col">
           <p className="text-md">Welcome to ShareFiles</p>
@@ -36,7 +44,12 @@ const Welcome = () => {
       </CardBody>
       <Divider />
       <CardFooter>
-        <Link showAnchorIcon href="/signup">
+        <Link
+          showAnchorIcon
+          href="/signup"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           New user? Sign up here to begin sharing securely.
         </Link>
       </CardFooter>

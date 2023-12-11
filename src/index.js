@@ -10,6 +10,10 @@ import Login from './login/login'
 import Signup from './signup/signup'
 import Footer from './components/Footer'
 import Dashboard from './dashboard/dashboard'
+import ManageFiles from './manageFiles/manageFiles'
+import Account from './account/account'
+import Help from './help/help'
+import { ToastContainer } from 'react-toastify'
 
 const token = localStorage.getItem('token')
 const isAuthenticated = !!token /* Check user authentication */
@@ -27,10 +31,16 @@ const App = () => {
             {isAuthenticated && (
               <Route path="/dashboard" element={<Dashboard />} />
             )}
+            {isAuthenticated && (
+              <Route path="/manageFiles" element={<ManageFiles />} />
+            )}
+            {isAuthenticated && <Route path="/account" element={<Account />} />}
+            <Route path="/help" element={<Help />} />
             <Route path="/*" element={<Navigate to="/" />} />
           </Routes>
           <Footer />
         </NextUIProvider>
+        <ToastContainer />
       </React.StrictMode>
     </BrowserRouter>
   )

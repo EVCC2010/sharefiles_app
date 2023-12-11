@@ -2,11 +2,14 @@ import React from 'react'
 import { Input, Button } from '@nextui-org/react'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
+import { toast } from 'react-toastify'
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
 
 const Login = () => {
   const handleLogin = async (values) => {
     try {
-      const response = await fetch('http://localhost:4000/login', {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,21 +25,18 @@ const Login = () => {
         const token = data.token
 
         // Store the token in a secure HTTP-only cookie
-        // document.cookie = `token=${token}; Secure; HttpOnly; SameSite=Strict`
+        document.cookie = `token=${token}; Secure; HttpOnly; SameSite=Strict`
         localStorage.setItem('token', token)
-
         console.log('Login successful')
-        window.location.href = '/dashboard' // Redirect to a safe URL
+        window.location.href = '/dashboard'
       } else {
         const errorMessage = await response.json()
         console.error(errorMessage)
-        // Show user-friendly error message
-        alert('Login failed. Please check your credentials.')
+        toast.error('Login failed. Please check your credentials.')
       }
     } catch (error) {
       console.error('Error', error)
-      // Show user-friendly error message
-      alert('An error occurred while logging in. Please try again.')
+      toast.error('An error occurred while logging in. Please try again.')
     }
   }
 

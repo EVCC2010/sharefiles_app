@@ -11,6 +11,7 @@ const fs = require('fs')
 const path = require('path')
 const { body, validationResult } = require('express-validator')
 const mime = require('mime-types')
+const api = require('api')('@virustotal/v3.0#40nj53llc655dro')
 require('dotenv').config()
 
 const app = express()
@@ -22,7 +23,7 @@ app.use(cors())
 app.use(helmet())
 
 function ensureUploadDirectory() {
-  const uploadDir = path.join(__dirname, '../uploads')
+  const uploadDir = path.join(__dirname, '../../uploads')
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true }, (err) => {
       if (err) {
@@ -202,40 +203,60 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' })
     }
 
-    const { filename, originalname } = req.file
-    const fileSize = req.file.size
-
-    if (!req.headers.authorization) {
-      return res.status(401).json({ error: 'Unauthorized' })
-    }
-
-    const token = req.headers.authorization.split(' ')[1]
-
-    const decodedToken = jwt.verify(token, jwtSecret)
-    const userId = decodedToken.userId
-
-    db.query(
-      'INSERT INTO files (original_filename, renamed_filename, path, uploaded_by,size,shared) VALUES (?,?,?,?,?,?)',
-      [originalname, filename, 'uploads/' + filename, userId, fileSize, true],
-      (error, result) => {
-        if (error) {
-          console.error('Error saving file metadata:', error)
-          // Remove the uploaded file if there's an error in saving metadata
-          fs.unlinkSync(req.file.path)
-          return res.status(500).json({ error: 'Error saving file metadata' })
+    try {
+      const response = await api.postFiles(
+        { file: req.file.path },
+        {
+          'x-apikey': process.env.VIRUS_TOTAL_API_KEY,
         }
-        res.status(200).json({
-          message: 'File uploaded successfully',
-          fileId: result.insertId,
-        })
+      )
+
+      console.log('VirusTotal scan result:', response.data)
+
+      if (response.data.meta_info && response.data.meta_info.total > 0) {
+        // If the file is detected as infected, do not proceed with upload
+        fs.unlinkSync(req.file.path) // Remove the uploaded file
+        return res
+          .status(400)
+          .json({ error: 'File is infected and not allowed to be uploaded' })
       }
-    )
+
+      const { filename, originalname } = req.file
+      const fileSize = req.file.size
+
+      if (!req.headers.authorization) {
+        fs.unlinkSync(req.file.path) // Remove the uploaded file
+        return res.status(401).json({ error: 'Unauthorized' })
+      }
+
+      const token = req.headers.authorization.split(' ')[1]
+      const decodedToken = jwt.verify(token, jwtSecret)
+      const userId = decodedToken.userId
+
+      db.query(
+        'INSERT INTO files (original_filename, renamed_filename, path, uploaded_by, size, shared) VALUES (?,?,?,?,?,?)',
+        [originalname, filename, 'uploads/' + filename, userId, fileSize, true],
+        (error, result) => {
+          if (error) {
+            console.error('Error saving file metadata:', error)
+            // Remove the uploaded file if there's an error in saving metadata
+            fs.unlinkSync(req.file.path)
+            return res.status(500).json({ error: 'Error saving file metadata' })
+          }
+          res.status(200).json({
+            message:
+              'File uploaded and scanned with VirusTotal. No infection detected.',
+            virusTotalResult: response.data,
+          })
+        }
+      )
+    } catch (error) {
+      console.error('Error scanning file with VirusTotal:', error)
+      fs.unlinkSync(req.file.path) // Remove the uploaded file
+      res.status(500).json({ error: 'Error scanning file with VirusTotal' })
+    }
   } catch (error) {
     console.error('Error:', error)
-    // Remove the uploaded file if there's an unexpected error
-    if (req.file && req.file.path) {
-      fs.unlinkSync(req.file.path)
-    }
     res.status(500).json({ error: 'Internal server error' })
   }
 })
@@ -252,12 +273,8 @@ app.get('/dashboard/summary', async (req, res) => {
         COUNT(*) AS uploadedFiles, 
         SUM(size) AS storageUsed,
         SUM(IF(shared = true, 1, 0)) AS sharedFiles
-        /* You might need to adjust this query based on your database schema */
-        /* Add more queries as needed to get the required summary data */
-
       FROM files
       WHERE uploaded_by = ?
-      /* Add conditions if necessary */
     `
     db.query(summaryQuery, [userId], (error, results) => {
       if (error) {

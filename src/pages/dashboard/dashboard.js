@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Card, Button } from '@nextui-org/react'
-import styles from '../css/dashboard.module.css'
+import styles from '../../css/dashboard.module.css'
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
 
@@ -13,21 +13,22 @@ const Dashboard = () => {
   })
 
   const [error, setError] = useState('')
-  useEffect(() => {
-    const fetchSummaryData = async () => {
-      try {
-        const token = localStorage.getItem('token')
-        const response = await axios.get(`${API_BASE_URL}/dashboard/summary`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        setSummaryData(response.data)
-      } catch (error) {
-        console.error('Error fetching summary data:', error.message)
-        setError('Failed to fetch summary data')
-      }
+  const fetchSummaryData = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await axios.get(`${API_BASE_URL}/dashboard/summary`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      setSummaryData(response.data)
+    } catch (error) {
+      console.error('Error fetching summary data:', error.message)
+      setError('Failed to fetch summary data')
     }
+  }
+
+  useEffect(() => {
     fetchSummaryData()
   }, [])
 
@@ -50,9 +51,11 @@ const Dashboard = () => {
             },
           })
           // Refresh summary data after successful file upload
-          // fetchSummaryData()
+          fetchSummaryData()
+          alert('your file has been uploaded')
         } catch (error) {
           console.error('Error uploading file:', error.message)
+          alert('your file was not uploaded, try again')
         }
       }
 
@@ -93,7 +96,7 @@ const Dashboard = () => {
             <h3>Storage Used</h3>
           </div>
           <div className={styles.cardMiddle}>
-            <p>{summaryData.storageUsed} MB</p>
+            <p>{(summaryData.storageUsed / 1024 / 1024).toPrecision(2)} MB</p>
           </div>
           <div className={styles.cardBottom}>
             <p>Size of Files uploaded</p>

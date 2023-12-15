@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Card, Button } from '@nextui-org/react'
-import styles from '../css/manageFiles.module.css'
+import styles from '../../css/manageFiles.module.css'
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
 
@@ -150,14 +150,14 @@ const ManageFiles = () => {
               <Button
                 onClick={() => handleDeleteFile(file.id)}
                 disabled={!canDelete()}
-                className={styles.button} // Apply the CSS class
+                className={styles.button}
               >
                 Delete
               </Button>
               {isOwner(file.uploaded_by) && (
                 <Button
                   onClick={() => handleToggleShared(file.id, file.shared)}
-                  className={styles.button} // Apply the CSS class
+                  className={styles.button}
                 >
                   Toggle Shared
                 </Button>

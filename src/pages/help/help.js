@@ -1,7 +1,7 @@
 const Help = () => {
   return (
     <div>
-      <h1>Help</h1>
+      <h1>This is the Help and Support Webpage</h1>
     </div>
   )
 }

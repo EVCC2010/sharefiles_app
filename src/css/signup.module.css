@@ -1,0 +1,11 @@
+input[type="date"] {
+    font-size: 9px;
+    color: gray;
+    height: 10px;
+}
+
+input[type="date"]:focus {
+    font-size: 14px;
+    color:gray;
+    height: 30px;
+}

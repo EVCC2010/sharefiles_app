@@ -12,12 +12,12 @@ export default function SignupLoginWithRecaptcha() {
       return
     }
 
-    // Perform signup logic here
+    // signup logic here
     console.log('Signup button clicked')
   }
 
   const handleLogin = () => {
-    // Perform login logic here
+    // login logic here
     console.log('Login button clicked')
   }
 

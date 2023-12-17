@@ -4,16 +4,21 @@ import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import '../../css/signup.module.css'
+import ReCAPTCHA from 'react-google-recaptcha'
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
 
 const Signup = () => {
   const [signupSuccess, setSignupSuccess] = useState(false)
   const [signupError, setSignupError] = useState('')
+  const [recaptchaToken, setRecaptchaToken] = useState('')
 
   const handleSignup = async (values, { setSubmitting, resetForm }) => {
+    const payload = { ...values, recaptchaToken }
+
     try {
-      const response = await axios.post(`${API_BASE_URL}/signup`, values)
+      const response = await axios.post(`${API_BASE_URL}/signup`, payload)
       console.log('Signup successful:', response.data)
       setSignupSuccess(true)
       resetForm()
@@ -22,7 +27,7 @@ const Signup = () => {
       )
       setTimeout(() => {
         window.location.href = '/'
-      }, 3000)
+      }, 5000)
     } catch (error) {
       console.error('Error:', error.message)
       setSignupError('Signup failed. Please try again.')
@@ -49,6 +54,10 @@ const Signup = () => {
       .oneOf([Yup.ref('password'), null], 'Passwords must match'),
   })
 
+  const clearErrors = () => {
+    setSignupError('')
+    setSignupSuccess(false)
+  }
   return (
     <div className="flex justify-center">
       <div className="flex flex-col justify-center items-center m-4 p-4 border border-gray-200 rounded-md shadow-md">
@@ -74,6 +83,7 @@ const Signup = () => {
                 name="first_name"
                 as={Input}
                 label="First Name"
+                onFocus={clearErrors}
               />
               <ErrorMessage
                 name="first_name"
@@ -86,6 +96,7 @@ const Signup = () => {
                 name="last_name"
                 as={Input}
                 label="Last Name"
+                onFocus={clearErrors}
               />
               <ErrorMessage
                 name="last_name"
@@ -93,7 +104,13 @@ const Signup = () => {
                 className="text-red-500"
               />
 
-              <Field type="email" name="email" as={Input} label="Email" />
+              <Field
+                type="email"
+                name="email"
+                as={Input}
+                label="Email"
+                onFocus={clearErrors}
+              />
               <ErrorMessage
                 name="email"
                 component="div"
@@ -105,6 +122,7 @@ const Signup = () => {
                 name="date_of_birth"
                 as={Input}
                 label="Date of Birth"
+                onFocus={clearErrors}
               />
               <ErrorMessage
                 name="date_of_birth"
@@ -117,6 +135,7 @@ const Signup = () => {
                 name="password"
                 as={Input}
                 label="Password"
+                onFocus={clearErrors}
               />
               <ErrorMessage
                 name="password"
@@ -128,11 +147,19 @@ const Signup = () => {
                 name="retype_password"
                 as={Input}
                 label="Retype Password"
+                onFocus={clearErrors}
               />
               <ErrorMessage
                 name="retype_password"
                 component="div"
                 className="text-red-500"
+              />
+              <ReCAPTCHA
+                sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+                onChange={(token) => {
+                  setRecaptchaToken(token)
+                  clearErrors()
+                }}
               />
 
               <Button type="submit" variant="secondary" disabled={isSubmitting}>

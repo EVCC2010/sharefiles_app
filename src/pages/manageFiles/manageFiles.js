@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Card, Button } from '@nextui-org/react'
 import styles from '../../css/manageFiles.module.css'
+import Banner from '../../components/banner'
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
 
@@ -55,12 +56,10 @@ const ManageFiles = () => {
   }
 
   function handleDownloadFile(fileId, filename) {
-    // Perform logic to download the file using its fileId or filename
-    // For example:
     axios({
-      url: `${API_BASE_URL}/download/${fileId}`, // Adjust the endpoint for file download
+      url: `${API_BASE_URL}/download/${fileId}`,
       method: 'GET',
-      responseType: 'blob', // Set the response type to blob for file download
+      responseType: 'blob',
     })
       .then((response) => {
         // Create a link element to initiate the download
@@ -74,38 +73,35 @@ const ManageFiles = () => {
         link.parentNode.removeChild(link)
       })
       .catch((error) => {
-        // Handle error scenarios or display an error message
         console.error('Error downloading file:', error.message)
       })
   }
 
+  // Setting for banner
+  const [message, setMessage] = useState('')
+
   function handleDeleteFile(fileId) {
-    // Perform logic to delete the file based on its fileId
     axios
       .delete(`${API_BASE_URL}/files/${fileId}`)
       .then((response) => {
-        // Handle success message or update UI upon successful deletion
         console.log('File deleted successfully')
-        // Update the files state to remove the deleted file from the UI
+        setMessage('File Successfully Deleted!')
         setFiles((prevFiles) => prevFiles.filter((file) => file.id !== fileId))
       })
       .catch((error) => {
-        // Handle error scenarios or display an error message
         console.error('Error deleting file:', error.message)
+        setMessage('Error deleting file')
       })
   }
 
   function handleToggleShared(fileId, currentSharedStatus) {
-    // Perform logic to toggle the shared status of the file based on its fileId
     const newSharedStatus = !currentSharedStatus // Toggle the shared status
     axios
       .put(`${API_BASE_URL}/files/toggleShare/${fileId}`, {
         shared: newSharedStatus,
       })
       .then((response) => {
-        // Handle success message or update UI upon successful status toggle
         console.log('Shared status updated successfully')
-        // Update the files state or UI to reflect the updated shared status
         setFiles((prevFiles) =>
           prevFiles.map((file) =>
             file.id === fileId ? { ...file, shared: newSharedStatus } : file
@@ -113,59 +109,66 @@ const ManageFiles = () => {
         )
       })
       .catch((error) => {
-        // Handle error scenarios or display an error message
         console.error('Error updating shared status:', error.message)
       })
   }
 
   return (
-    <div className={styles.gridContainer}>
-      {files.map((file) => (
-        <div key={file.id} className={styles.gridItem}>
-          <Card>
-            {/* Display file information */}
-            <div className={styles.cardHeader}>
-              <h3>{file.original_filename}</h3>
-            </div>
-            <div className={styles.cardMiddle}>
-              <p>Uploaded at: {file.uploaded_at}</p>
-              <p>Size: {file.size} MB</p>
-              <p>Shared: {file.shared ? 'Yes' : 'No'}</p>
-              <p>
-                {isOwner(file.uploaded_by)
-                  ? 'You are the owner'
-                  : 'You are not the owner'}
-              </p>
-            </div>
-            <div className={styles.cardBottom}>
-              {/* Add buttons for download, delete, toggle shared status */}
-              <Button
-                onClick={() =>
-                  handleDownloadFile(file.id, file.original_filename)
-                }
-                className={styles.button}
-              >
-                Download
-              </Button>
-              <Button
-                onClick={() => handleDeleteFile(file.id)}
-                disabled={!canDelete()}
-                className={styles.button}
-              >
-                Delete
-              </Button>
-              {isOwner(file.uploaded_by) && (
+    <div>
+      {message && <Banner message={message} />}
+      <div className={styles.gridContainer}>
+        {files.map((file) => (
+          <div key={file.id} className={styles.gridItem}>
+            <Card>
+              <div className={styles.cardHeader}>
+                <h3>{file.original_filename}</h3>
+              </div>
+              <div className={styles.cardMiddle}>
+                <p>Uploaded at: {file.uploaded_at}</p>
+                <p>Size: {file.size} MB</p>
+                <p>
+                  Shared:{' '}
+                  <span
+                    className={file.shared ? 'text-green-500' : 'text-red-500'}
+                  >
+                    {file.shared ? 'Yes' : 'No'}
+                  </span>
+                </p>
+                <p>
+                  {isOwner(file.uploaded_by)
+                    ? 'You are the owner'
+                    : 'You are not the owner'}
+                </p>
+              </div>
+              <div className={styles.cardBottom}>
                 <Button
-                  onClick={() => handleToggleShared(file.id, file.shared)}
+                  onClick={() =>
+                    handleDownloadFile(file.id, file.original_filename)
+                  }
                   className={styles.button}
                 >
-                  Toggle Shared
+                  Download
                 </Button>
-              )}
-            </div>
-          </Card>
-        </div>
-      ))}
+                <Button
+                  onClick={() => handleDeleteFile(file.id)}
+                  disabled={!canDelete()}
+                  className={styles.button}
+                >
+                  Delete
+                </Button>
+                {isOwner(file.uploaded_by) && (
+                  <Button
+                    onClick={() => handleToggleShared(file.id, file.shared)}
+                    className={styles.button}
+                  >
+                    Toggle Shared
+                  </Button>
+                )}
+              </div>
+            </Card>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
